@@ -16,6 +16,7 @@ func NewReportService(q *db.Queries) *ReportService {
 	}
 }
 
+//fee collected from a merchant till date
 func (s *ReportService) MerchantCommissionSummary(
 	ctx context.Context,
 ) ([]db.GetMerchantCommissionSummaryRow, error) {
@@ -23,6 +24,7 @@ func (s *ReportService) MerchantCommissionSummary(
 	return s.queries.GetMerchantCommissionSummary(ctx)
 }
 
+//Dues for a user so far
 func (s *ReportService) UserOutstandingDues(
 	ctx context.Context,
 ) ([]db.GetUserOutstandingDuesRow, error) {
@@ -30,6 +32,7 @@ func (s *ReportService) UserOutstandingDues(
 	return s.queries.GetUserOutstandingDues(ctx)
 }
 
+//users have reached their credit limit
 func (s *ReportService) UsersAtCreditLimit(
 	ctx context.Context,
 ) ([]db.GetUsersAtCreditLimitRow, error) {
@@ -37,6 +40,7 @@ func (s *ReportService) UsersAtCreditLimit(
 	return s.queries.GetUsersAtCreditLimit(ctx)
 }
 
+// total dues from all users together
 func (s *ReportService) OutstandingBalance(
 	ctx context.Context,
 ) (string, error) {

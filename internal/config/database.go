@@ -9,7 +9,7 @@ import (
 
 func NewMySQL(cfg *Config) (*sql.DB, error) {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s",
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
 		cfg.DBUser,
 		cfg.DBPassword,
 		cfg.DBHost,

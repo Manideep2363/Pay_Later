@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"strconv"
+	"fmt"
 
 	"paylater/internal/db"
 )
@@ -19,6 +20,7 @@ func NewMerchantService(q *db.Queries) *MerchantService {
 	}
 }
 
+//Onboarding merchant
 func (s *MerchantService) CreateMerchant(
 	ctx context.Context,
 	name string,
@@ -46,6 +48,50 @@ func (s *MerchantService) CreateMerchant(
 
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+//Get merchant_By_ID
+func (s *MerchantService) GetMerchantByID(
+	ctx context.Context,
+	id int32,
+) (db.Merchant, error) {
+
+	return s.queries.GetMerchantByID(ctx, id)
+}
+
+//ListMerchants
+func (s *MerchantService) ListMerchants(
+	ctx context.Context) ([]db.Merchant,error) {
+		return s.queries.ListMerchants(ctx)
+}
+
+//update Merchant commission
+func (s *MerchantService) UpdateMerchantCommission(
+	ctx context.Context,
+	id int32,
+	commission float64,
+) error {
+
+	commissionStr := strconv.FormatFloat(commission, 'f', 2, 64)
+
+	result, err := s.queries.UpdateMerchantCommission(ctx, db.UpdateMerchantCommissionParams{
+		MerchantID:             id,
+		CommissionPercentage: commissionStr,
+	})
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("merchant not found")
 	}
 
 	return nil

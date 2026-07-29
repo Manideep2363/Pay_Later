@@ -15,6 +15,13 @@ type Merchant struct {
 	CommissionPercentage string
 }
 
+type Payment struct {
+	PaymentID int32
+	UserID    int32
+	Amount    string
+	PaidAt    sql.NullTime
+}
+
 type Transaction struct {
 	TransactionID        int32
 	UserID               int32

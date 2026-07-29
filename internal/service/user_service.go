@@ -19,6 +19,7 @@ func NewUserService(q *db.Queries) *UserService {
 	}
 }
 
+//Onboading User
 func (s *UserService) CreateUser(
 	ctx context.Context,
 	name string,
@@ -44,4 +45,9 @@ func (s *UserService) CreateUser(
 	}
 
 	return nil
+}
+
+//List_users
+func (s *UserService) ListUsers(ctx context.Context) ([]db.User, error) {
+	return s.queries.ListUsers(ctx)
 }

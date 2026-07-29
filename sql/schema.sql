@@ -25,3 +25,12 @@ CREATE TABLE transactions (
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (merchant_id) REFERENCES merchants(merchant_id)
 );
+
+CREATE TABLE payments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    paid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);

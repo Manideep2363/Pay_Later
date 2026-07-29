@@ -125,3 +125,38 @@ func parseDecimal(value string) (float64, error) {
 func formatDecimal(value float64) string {
 	return strconv.FormatFloat(value, 'f', 2, 64)
 }
+
+//List_out_all_Transactions
+func (s *TransactionService) ListTransactions(
+	ctx context.Context,
+) ([]db.Transaction, error) {
+
+	return s.queries.ListTransactions(ctx)
+}
+
+//Access Tranasaction By ID
+func (s *TransactionService) GetTransactionByID(
+	ctx context.Context,
+	id int32,
+) (db.Transaction, error) {
+
+	return s.queries.GetTransactionByID(ctx, id)
+}
+
+//Transactions made by single user
+func (s *TransactionService) ListUserTransactions(
+	ctx context.Context,
+	userID int32,
+) ([]db.Transaction, error) {
+
+	return s.queries.ListUserTransactions(ctx, userID)
+}
+
+//Transactions of single merchant
+func (s *TransactionService) ListMerchantTransactions(
+	ctx context.Context,
+	merchantID int32,
+) ([]db.Transaction, error) {
+
+	return s.queries.ListMerchantTransactions(ctx, merchantID)
+}
