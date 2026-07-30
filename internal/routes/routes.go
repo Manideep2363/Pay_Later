@@ -5,12 +5,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"paylater/internal/config"
 	"paylater/internal/db"
 	"paylater/internal/handlers"
+	"paylater/internal/middleware"
 	"paylater/internal/service"
 )
 
-func SetupRoutes(router *gin.Engine, dbConn *sql.DB) {
+func SetupRoutes(
+	router *gin.Engine,
+	dbConn *sql.DB,
+	cfg *config.Config,
+) {
 
 	queries := db.New(dbConn)
 
@@ -20,6 +26,13 @@ func SetupRoutes(router *gin.Engine, dbConn *sql.DB) {
 	transactionService := service.NewTransactionService(dbConn, queries)
 	reportService := service.NewReportService(queries)
 	paymentService := service.NewPaymentService(dbConn, queries)
+	authService := service.NewAuthService(
+		dbConn,
+		queries,
+		cfg.JWTSecret,
+		cfg.AdminEmail,
+		cfg.AdminPassword,
+	)
 
 	// Handlers
 	userHandler := handlers.NewUserHandler(userService)
@@ -27,31 +40,62 @@ func SetupRoutes(router *gin.Engine, dbConn *sql.DB) {
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
 	reportHandler := handlers.NewReportHandler(reportService)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
+	authHandler := handlers.NewAuthHandler(authService)
 
+	// ===========================
+	// Public Routes
+	// ===========================
+	router.POST("/register", authHandler.Register)
+	router.POST("/login", authHandler.Login)
+	router.POST("/admin/login", authHandler.AdminLogin)
+
+	// ===========================
 	// User Routes
-	router.POST("/users", userHandler.CreateUser)
-	router.GET("/users", userHandler.ListUsers)
+	// Accessible by:
+	// - User
+	// - Admin
+	// ===========================
+	user := router.Group("/")
+	user.Use(
+	middleware.AuthMiddleware(cfg.JWTSecret),
+	middleware.RequireRole("user", "admin"),
+	)
 
-	// Merchant Routes
-	router.POST("/merchants", merchantHandler.CreateMerchant)
-	router.GET("/merchants/:id", merchantHandler.GetMerchantByID)
-	router.GET("/merchants",merchantHandler.ListMerchants)
-	router.PUT("/merchants/:id/commission", merchantHandler.UpdateMerchantCommission)
+	user.POST("/purchases", transactionHandler.Purchase)
+	user.POST("/payments", paymentHandler.Repay)
 
-	// Transaction Routes
-	router.POST("/purchase", transactionHandler.Purchase)
-	router.GET("/transactions", transactionHandler.ListTransactions)
-	router.GET("/transactions/:id", transactionHandler.GetTransactionByID)
-	router.GET("/users/:id/transactions", transactionHandler.ListUserTransactions)
+	user.GET("/users/:id/payments", paymentHandler.ListUserPayments)
+	// ===========================
+	// Admin Routes
+	// Accessible only by Admin
+	// ===========================
+	admin := router.Group("/admin")
+	admin.Use(
+		middleware.AuthMiddleware(cfg.JWTSecret),
+		middleware.RequireRole("admin"),
+	)
 
-	// Report Routes
-	router.GET("/reports/outstanding-balance", reportHandler.OutstandingBalance)
-	router.GET("/reports/users-due", reportHandler.UserOutstandingDues)
-	router.GET("/reports/users-at-credit-limit", reportHandler.UsersAtCreditLimit)
-	router.GET("/reports/merchant-commissions", reportHandler.MerchantCommissionSummary)
+	// User Management
+	admin.POST("/users", userHandler.CreateUser)
+	admin.GET("/users", userHandler.ListUsers)
 
-	//paybacks Routes
-	router.POST("/repay", paymentHandler.Repay)
-	router.GET("/payments/:id", paymentHandler.GetPaymentByID)
-	router.GET("/users/:id/payments", paymentHandler.ListUserPayments)
+	// Merchant Management
+	admin.POST("/merchants", merchantHandler.CreateMerchant)
+	admin.GET("/merchants", merchantHandler.ListMerchants)
+	admin.GET("/merchants/:id", merchantHandler.GetMerchantByID)
+	admin.PUT("/merchants/:id/commission", merchantHandler.UpdateMerchantCommission)
+
+	// Transaction Management
+	admin.GET("/purchases", transactionHandler.ListTransactions)
+	admin.GET("/purchases/:id", transactionHandler.GetTransactionByID)
+	admin.GET("/users/:id/purchases", transactionHandler.ListUserTransactions)
+
+	// Payment Management
+	admin.GET("/payments/:id", paymentHandler.GetPaymentByID)
+
+	// Reports
+	admin.GET("/reports/outstanding-balance", reportHandler.OutstandingBalance)
+	admin.GET("/reports/users-due", reportHandler.UserOutstandingDues)
+	admin.GET("/reports/users-at-credit-limit", reportHandler.UsersAtCreditLimit)
+	admin.GET("/reports/merchant-commissions", reportHandler.MerchantCommissionSummary)
 }

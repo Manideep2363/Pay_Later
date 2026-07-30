@@ -36,6 +36,7 @@ type User struct {
 	UserID      int32
 	Name        string
 	Email       string
+	Password    string
 	CreditLimit string
 	CurrentDue  string
 }

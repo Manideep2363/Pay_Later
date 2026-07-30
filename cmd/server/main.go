@@ -29,7 +29,7 @@ func main() {
 	}
 
 	// Register all routes
-	routes.SetupRoutes(router, dbConn)
+	routes.SetupRoutes(router, dbConn, cfg)
 
 	// Start server
 	log.Printf("Server running on port %s", cfg.ServerPort)

@@ -1,9 +1,11 @@
 -- name: CreateUser :execresult
 INSERT INTO users (
     name,
-    email
+    email,
+    password
 )
 VALUES (
+    ?,
     ?,
     ?
 );
@@ -34,6 +36,7 @@ SELECT
     user_id,
     name,
     email,
+    password,
     credit_limit,
     current_due
 FROM users

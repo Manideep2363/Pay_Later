@@ -8,8 +8,9 @@ import (
 	"paylater/internal/db"
 )
 
+
 type UserService struct {
-	queries *db.Queries
+	queries *db.Queries//service needs sqlc to talk to the db
 }
 
 // Constructor
@@ -47,7 +48,7 @@ func (s *UserService) CreateUser(
 	return nil
 }
 
-//List_users
-func (s *UserService) ListUsers(ctx context.Context) ([]db.User, error) {
+//list User
+func (s *UserService) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) {
 	return s.queries.ListUsers(ctx)
 }

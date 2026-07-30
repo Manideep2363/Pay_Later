@@ -15,13 +15,16 @@ type Config struct {
 	DBName     string
 
 	ServerPort string
+	JWTSecret  string
+
+	AdminEmail    string
+	AdminPassword string
 }
 
 func LoadConfig() *Config {
-	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 
 	return &Config{
@@ -32,5 +35,11 @@ func LoadConfig() *Config {
 		DBName:     os.Getenv("DB_NAME"),
 
 		ServerPort: os.Getenv("SERVER_PORT"),
+		JWTSecret:  os.Getenv("JWT_SECRET"),
+
+
+		AdminEmail:    os.Getenv("ADMIN_EMAIL"),
+		AdminPassword: os.Getenv("ADMIN_PASSWORD"),
+
 	}
 }
