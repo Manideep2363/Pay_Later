@@ -47,7 +47,10 @@ func SetupRoutes(
 	// ===========================
 	router.POST("/register", authHandler.Register)
 	router.POST("/login", authHandler.Login)
+	router.POST("/merchant/register", authHandler.MerchantRegister)
+	router.POST("/merchant/login", authHandler.MerchantLogin)
 	router.POST("/admin/login", authHandler.AdminLogin)
+
 
 	// ===========================
 	// User Routes
@@ -60,6 +63,14 @@ func SetupRoutes(
 	middleware.AuthMiddleware(cfg.JWTSecret),
 	middleware.RequireRole("user", "admin"),
 	)
+
+	merchant := router.Group("/merchant")
+	merchant.Use(
+	middleware.AuthMiddleware(cfg.JWTSecret),
+	middleware.RequireRole("merchant", "admin"),
+	)
+
+	//merchant.GET("/profile", merchantHandler.GetProfile)
 
 	user.POST("/purchases", transactionHandler.Purchase)
 	user.POST("/payments", paymentHandler.Repay)
@@ -83,15 +94,18 @@ func SetupRoutes(
 	admin.POST("/merchants", merchantHandler.CreateMerchant)
 	admin.GET("/merchants", merchantHandler.ListMerchants)
 	admin.GET("/merchants/:id", merchantHandler.GetMerchantByID)
+	merchant.GET("/profile", merchantHandler.GetProfile)
 	admin.PUT("/merchants/:id/commission", merchantHandler.UpdateMerchantCommission)
 
 	// Transaction Management
 	admin.GET("/purchases", transactionHandler.ListTransactions)
 	admin.GET("/purchases/:id", transactionHandler.GetTransactionByID)
 	admin.GET("/users/:id/purchases", transactionHandler.ListUserTransactions)
+	merchant.GET("/merchant/:id/transactions", transactionHandler.ListMerchantTransactions) 
 
 	// Payment Management
-	admin.GET("/payments/:id", paymentHandler.GetPaymentByID)
+	user.GET("/payments", paymentHandler.GetPayments)
+	admin.GET("/payments/:id",paymentHandler.GetPaymentByID)
 
 	// Reports
 	admin.GET("/reports/outstanding-balance", reportHandler.OutstandingBalance)

@@ -57,14 +57,14 @@ func (s *MerchantService) CreateMerchant(
 func (s *MerchantService) GetMerchantByID(
 	ctx context.Context,
 	id int32,
-) (db.Merchant, error) {
+) (db.GetMerchantByIDRow, error) {
 
 	return s.queries.GetMerchantByID(ctx, id)
 }
 
 //ListMerchants
 func (s *MerchantService) ListMerchants(
-	ctx context.Context) ([]db.Merchant,error) {
+	ctx context.Context) ([]db.ListMerchantsRow,error) {
 		return s.queries.ListMerchants(ctx)
 }
 

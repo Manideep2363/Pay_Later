@@ -24,7 +24,6 @@ func NewTransactionHandler(s *service.TransactionService) *TransactionHandler {
 // PurchaseRequest represents the JSON request body
 // required to make a purchase.
 type PurchaseRequest struct {
-	UserID     int32   `json:"user_id"`
 	MerchantID int32   `json:"merchant_id"`
 	Amount     float64 `json:"amount"`
 }
@@ -46,9 +45,11 @@ func (h *TransactionHandler) Purchase(c *gin.Context) {
 	}
 
 	// Call the service layer to process the purchase.
+
+	userID := c.MustGet("id").(int32)
 	err := h.service.Purchase(
 		c.Request.Context(),
-		req.UserID,
+		userID,
 		req.MerchantID,
 		req.Amount,
 	)
@@ -177,7 +178,7 @@ func (h *TransactionHandler) ListMerchantTransactions(c *gin.Context) {
 			"error": err.Error(),
 		})
 		return
-	}
+	}	
 
 	// Return the merchant's transactions.
 	c.JSON(http.StatusOK, transactions)

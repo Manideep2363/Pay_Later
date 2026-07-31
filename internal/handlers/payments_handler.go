@@ -24,7 +24,6 @@ func NewPaymentHandler(s *service.PaymentService) *PaymentHandler {
 // RepayRequest represents the JSON request body
 // required to make a payment.
 type RepayRequest struct {
-	UserID int32   `json:"user_id" binding:"required"`
 	Amount float64 `json:"amount" binding:"required"`
 }
 
@@ -45,9 +44,10 @@ func (h *PaymentHandler) Repay(c *gin.Context) {
 	}
 
 	// Call the service layer to process the payment.
+	userID := c.MustGet("id").(int32)
 	err := h.service.Repay(
 		c.Request.Context(),
-		req.UserID,
+		userID,
 		req.Amount,
 	)
 
@@ -95,6 +95,24 @@ func (h *PaymentHandler) GetPaymentByID(c *gin.Context) {
 
 	// Return the payment details.
 	c.JSON(http.StatusOK, payment)
+}
+
+func (h *PaymentHandler) GetPayments(c *gin.Context) {
+
+	userID := c.MustGet("id").(int32)
+
+	payments, err := h.service.ListUserPayments(
+		c.Request.Context(),
+		userID,
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, payments)
 }
 
 // ListUserPayments handles

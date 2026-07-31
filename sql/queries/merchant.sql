@@ -1,20 +1,19 @@
 -- name: CreateMerchant :execresult
 INSERT INTO merchants (
     name,
+    email,
     phone,
+    password_hash,
     commission_percentage
 )
-VALUES (
-    ?,
-    ?,
-    ?
-);
+VALUES (?, ?, ?, ?, ?);
 
 -- name: ListMerchants :many
 SELECT
     merchant_id,
     name,
     phone,
+    email,
     commission_percentage
 FROM merchants
 ORDER BY merchant_id;
@@ -24,6 +23,7 @@ SELECT
     merchant_id,
     name,
     phone,
+    email,
     commission_percentage
 FROM merchants
 WHERE merchant_id = ?;
@@ -42,3 +42,14 @@ SELECT
     commission_percentage
 FROM merchants
 WHERE phone = ?;
+
+-- name: GetMerchantByEmail :one
+SELECT
+    merchant_id,
+    name,
+    email,
+    phone,
+    password_hash,
+    commission_percentage
+FROM merchants
+WHERE email = ?;

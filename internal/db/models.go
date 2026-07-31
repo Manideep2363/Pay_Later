@@ -11,7 +11,9 @@ import (
 type Merchant struct {
 	MerchantID           int32
 	Name                 string
+	Email                string
 	Phone                string
+	PasswordHash         string
 	CommissionPercentage string
 }
 

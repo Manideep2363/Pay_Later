@@ -99,6 +99,24 @@ func (h *MerchantHandler) GetMerchantByID(c *gin.Context) {
 	c.JSON(http.StatusOK, merchant)
 }
 
+func (h *MerchantHandler) GetProfile(c *gin.Context) {
+
+	id := c.MustGet("id").(int32)
+
+	merchant, err := h.service.GetMerchantByID(
+		c.Request.Context(),
+		id,
+	)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "merchant not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, merchant)
+}
+
 // ListMerchants handles GET /merchants requests.
 func (h *MerchantHandler) ListMerchants(c *gin.Context) {
 

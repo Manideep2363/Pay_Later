@@ -117,3 +117,59 @@ func (h *AuthHandler) AdminLogin(c *gin.Context) {
 		"token": token,
 	})
 }
+
+func (h *AuthHandler) MerchantRegister(c *gin.Context) {
+
+	var req service.MerchantRegisterRequest
+
+	// Read request body.
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Register merchant.
+	if err := h.service.MerchantRegister(
+		c.Request.Context(),
+		req,
+	); err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "merchant registered successfully",
+	})
+}
+
+func (h *AuthHandler) MerchantLogin(c *gin.Context) {
+
+	var req service.MerchantLoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	token, err := h.service.MerchantLogin(
+		c.Request.Context(),
+		req,
+	)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+	})
+}

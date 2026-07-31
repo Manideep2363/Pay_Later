@@ -10,8 +10,10 @@ CREATE TABLE users (
 CREATE TABLE merchants (
     merchant_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    phone VARCHAR(15) NOT NULL UNIQUE,
-    commission_percentage DECIMAL(5,2) NOT NULL CHECK (commission_percentage >= 0)
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    commission_percentage DECIMAL(5,2) NOT NULL
 );
 
 CREATE TABLE transactions (

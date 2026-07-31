@@ -13,24 +13,56 @@ import (
 const createMerchant = `-- name: CreateMerchant :execresult
 INSERT INTO merchants (
     name,
+    email,
     phone,
+    password_hash,
     commission_percentage
 )
-VALUES (
-    ?,
-    ?,
-    ?
-)
+VALUES (?, ?, ?, ?, ?)
 `
 
 type CreateMerchantParams struct {
 	Name                 string
+	Email                string
 	Phone                string
+	PasswordHash         string
 	CommissionPercentage string
 }
 
 func (q *Queries) CreateMerchant(ctx context.Context, arg CreateMerchantParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createMerchant, arg.Name, arg.Phone, arg.CommissionPercentage)
+	return q.db.ExecContext(ctx, createMerchant,
+		arg.Name,
+		arg.Email,
+		arg.Phone,
+		arg.PasswordHash,
+		arg.CommissionPercentage,
+	)
+}
+
+const getMerchantByEmail = `-- name: GetMerchantByEmail :one
+SELECT
+    merchant_id,
+    name,
+    email,
+    phone,
+    password_hash,
+    commission_percentage
+FROM merchants
+WHERE email = ?
+`
+
+func (q *Queries) GetMerchantByEmail(ctx context.Context, email string) (Merchant, error) {
+	row := q.db.QueryRowContext(ctx, getMerchantByEmail, email)
+	var i Merchant
+	err := row.Scan(
+		&i.MerchantID,
+		&i.Name,
+		&i.Email,
+		&i.Phone,
+		&i.PasswordHash,
+		&i.CommissionPercentage,
+	)
+	return i, err
 }
 
 const getMerchantByID = `-- name: GetMerchantByID :one
@@ -38,18 +70,28 @@ SELECT
     merchant_id,
     name,
     phone,
+    email,
     commission_percentage
 FROM merchants
 WHERE merchant_id = ?
 `
 
-func (q *Queries) GetMerchantByID(ctx context.Context, merchantID int32) (Merchant, error) {
+type GetMerchantByIDRow struct {
+	MerchantID           int32
+	Name                 string
+	Phone                string
+	Email                string
+	CommissionPercentage string
+}
+
+func (q *Queries) GetMerchantByID(ctx context.Context, merchantID int32) (GetMerchantByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getMerchantByID, merchantID)
-	var i Merchant
+	var i GetMerchantByIDRow
 	err := row.Scan(
 		&i.MerchantID,
 		&i.Name,
 		&i.Phone,
+		&i.Email,
 		&i.CommissionPercentage,
 	)
 	return i, err
@@ -65,9 +107,16 @@ FROM merchants
 WHERE phone = ?
 `
 
-func (q *Queries) GetMerchantByPhone(ctx context.Context, phone string) (Merchant, error) {
+type GetMerchantByPhoneRow struct {
+	MerchantID           int32
+	Name                 string
+	Phone                string
+	CommissionPercentage string
+}
+
+func (q *Queries) GetMerchantByPhone(ctx context.Context, phone string) (GetMerchantByPhoneRow, error) {
 	row := q.db.QueryRowContext(ctx, getMerchantByPhone, phone)
-	var i Merchant
+	var i GetMerchantByPhoneRow
 	err := row.Scan(
 		&i.MerchantID,
 		&i.Name,
@@ -82,24 +131,34 @@ SELECT
     merchant_id,
     name,
     phone,
+    email,
     commission_percentage
 FROM merchants
 ORDER BY merchant_id
 `
 
-func (q *Queries) ListMerchants(ctx context.Context) ([]Merchant, error) {
+type ListMerchantsRow struct {
+	MerchantID           int32
+	Name                 string
+	Phone                string
+	Email                string
+	CommissionPercentage string
+}
+
+func (q *Queries) ListMerchants(ctx context.Context) ([]ListMerchantsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listMerchants)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Merchant
+	var items []ListMerchantsRow
 	for rows.Next() {
-		var i Merchant
+		var i ListMerchantsRow
 		if err := rows.Scan(
 			&i.MerchantID,
 			&i.Name,
 			&i.Phone,
+			&i.Email,
 			&i.CommissionPercentage,
 		); err != nil {
 			return nil, err
